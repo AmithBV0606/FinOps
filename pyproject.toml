@@ -1,0 +1,47 @@
+[project]
+name = "finops"
+version = "0.1.0"
+description = "FinOps dashboard and automated right-sizing for AWS (EC2, EBS, RDS)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "boto3>=1.34",
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "sqlalchemy>=2.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "streamlit>=1.33",
+    "plotly>=5.20",
+    "apscheduler>=3.10,<4",
+    "pydantic-settings>=2.2",
+    "pyyaml>=6.0",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "moto[ec2,rds,cloudwatch]>=5", "httpx>=0.27", "ruff>=0.4", "mypy>=1.9", "pre-commit>=3.7"]
+
+[project.scripts]
+finops = "finops.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["finops*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true

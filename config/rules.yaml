@@ -1,0 +1,47 @@
+# Analyzer thresholds. All percentages are 0-100.
+window:
+  min_days: 7          # fewer days of data -> insufficient_data
+  preferred_days: 30
+  rule_days: 14        # days required for "for 14 d" style rules
+
+ec2:
+  idle:
+    p95_cpu_below: 5.0
+    network_mb_per_day_below: 5.0
+  over_provisioned:
+    p95_cpu_below: 40.0
+    p95_mem_below: 50.0          # only used when mem_used_percent is collected
+  headroom:
+    # A downsized instance must keep projected p95 CPU at or below this value
+    # (covers observed peaks + 20% headroom).
+    max_projected_p95_cpu: 66.0
+    max_projected_peak_cpu: 90.0
+  suggest_burstable: true
+
+ebs:
+  unattached_days: 7
+  zero_ops_days: 14
+  zero_ops_per_day_below: 1.0    # read+write ops/day treated as "approximately zero"
+  migrate_to_gp3: [gp2, io1]
+  io1_max_p95_iops_for_gp3: 16000
+
+rds:
+  idle:
+    max_connections: 0
+  over_provisioned:
+    p95_cpu_below: 30.0
+    p95_connections_below: 20
+    min_freeable_memory_ratio: 0.5
+  headroom:
+    max_projected_p95_cpu: 60.0
+  multi_az_non_prod_envs: [dev, test, staging, sandbox]
+
+risk:
+  prod_tag_key: env
+  prod_tag_values: [prod, production]
+  non_prod_envs: [dev, test, staging, sandbox, qa]
+  managed_tag_key: "finops:managed"
+  managed_tag_value: "true"
+
+confidence:
+  weights: {window: 0.4, coverage: 0.3, stability: 0.3}

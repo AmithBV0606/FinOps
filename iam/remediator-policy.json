@@ -1,0 +1,58 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DescribeForBeforeAfterState",
+      "Effect": "Allow",
+      "Action": ["ec2:DescribeInstances", "ec2:DescribeVolumes", "ec2:DescribeSnapshots", "rds:DescribeDBInstances"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Ec2ActionsOnManagedNonProdOnly",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:StopInstances",
+        "ec2:StartInstances",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:ModifyVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DeleteVolume"
+      ],
+      "Resource": ["arn:aws:ec2:*:*:instance/*", "arn:aws:ec2:*:*:volume/*"],
+      "Condition": {
+        "StringEquals": {"aws:ResourceTag/finops:managed": "true"},
+        "StringNotEqualsIgnoreCase": {"aws:ResourceTag/env": ["prod", "production"]}
+      }
+    },
+    {
+      "Sid": "SnapshotResourceForCreateSnapshot",
+      "Effect": "Allow",
+      "Action": ["ec2:CreateSnapshot"],
+      "Resource": "arn:aws:ec2:*::snapshot/*"
+    },
+    {
+      "Sid": "TagOnlyFinOpsSnapshots",
+      "Effect": "Allow",
+      "Action": ["ec2:CreateTags"],
+      "Resource": "arn:aws:ec2:*::snapshot/*",
+      "Condition": {"ForAllValues:StringEquals": {"aws:TagKeys": ["finops:source-volume"]}}
+    },
+    {
+      "Sid": "RdsActionsOnManagedNonProdOnly",
+      "Effect": "Allow",
+      "Action": ["rds:ModifyDBInstance", "rds:StopDBInstance", "rds:StartDBInstance"],
+      "Resource": "arn:aws:rds:*:*:db:*",
+      "Condition": {
+        "StringEquals": {"aws:ResourceTag/finops:managed": "true"},
+        "StringNotEqualsIgnoreCase": {"aws:ResourceTag/env": ["prod", "production"]}
+      }
+    },
+    {
+      "Sid": "NeverTouchProd",
+      "Effect": "Deny",
+      "Action": ["ec2:*", "rds:*"],
+      "Resource": "*",
+      "Condition": {"StringEqualsIgnoreCase": {"aws:ResourceTag/env": ["prod", "production"]}}
+    }
+  ]
+}
